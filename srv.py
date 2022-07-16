@@ -9,6 +9,8 @@ import json
 import urllib.request
 import base64
 from datetime import timedelta
+import traceback
+
 import mitsuba.imcut as imcut
 
 
@@ -29,6 +31,62 @@ def init_session() :
     app.permanent_session_lifetime = timedelta(minutes=5)
     session.modified = True
 
+
+@app.route("/detect",methods=["POST"])
+def detect():
+    global bg
+
+    response = None
+    code=200
+
+    try:
+        #data = request.data.decode('utf-8')
+
+        #j = json.loads(data)
+
+        #img = base64.b64decode(j["img"])
+        #bgreq = j["bg"]
+
+        temp = request.json["img"]
+
+        img = np.frombuffer(base64.b64decode(temp), dtype=np.uint8)
+        bgreq = request.json["bg"]
+
+        #print(img)
+
+        reqframe = cv2.imdecode(img,flags=cv2.IMREAD_COLOR)
+
+        if bg is None :
+            bg = cv2.cvtColor(reqframe, cv2.COLOR_BGR2GRAY)
+            res={"res":-1,"img":temp}
+            response = jsonify(res)
+
+        else :
+            detec,frame = framediff(reqframe)
+
+            _,jpeg = cv2.imencode('.jpg', frame)
+
+            #imgstr = jpeg.tostring()
+            imgstr = base64.b64encode(jpeg.tostring()).decode("utf-8")
+
+            res={"res":detec,"img":imgstr}
+
+            response = jsonify(res)
+
+
+            if bgreq :
+                bg = cv2.cvtColor(reqframe, cv2.COLOR_BGR2GRAY)
+
+            #response.headers[""] = ""
+
+    except :
+        traceback.print_exc()
+        code=500
+    finally :
+        return response,code
+
+
+'''
 @app.route("/detect",methods=["POST"])
 def detect():
 
@@ -60,7 +118,7 @@ def detect():
         return response,code
 #    return Response(jpeg.tobytes(),mimetype="image/jpeg")
 
-
+'''
 
 
 @app.route("/bgrenew",methods=["POST"])
@@ -101,6 +159,8 @@ def framediff(frame):
     det1 = 0
     det2 = 0
 
+    retframe=frame.copy()
+
     if diff_thr < diff_point:
         contrs,hierarchy = cv2.findContours(frame_diff,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
 
@@ -111,7 +171,7 @@ def framediff(frame):
                 cx=int(mu["m10"]/mu["m00"])
                 cy=int(mu["m01"]/mu["m00"])
 
-                cutwx,cutwy = imcut.adjust_size(mu["m00"],0.8,cutsize)
+                cutwx,cutwy = imcut.adjust_size(mu["m00"],0.6,cutsize)
 
                 xx = imcut.cut_over(cx,cutwx,allsize[0])
                 yy = imcut.cut_over(cy,cutwy,allsize[1])
@@ -127,14 +187,15 @@ def framediff(frame):
                 else :
                     det2 += 1
 
-                cv2.rectangle(frame,(xx[0],yy[0]),(xx[1],yy[1]),color, 1)
+                cv2.circle(retframe, (cx,cy), 4, color, 2)
+                cv2.rectangle(retframe,(xx[0],yy[0]),(xx[1],yy[1]),color, 1)
 
     detec = -1
 
     if det1>0 : detec = 1
     elif det2>0 : detec = 0
 
-    return detec,frame
+    return detec,retframe
 
 
 def predict(frame):
