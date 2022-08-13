@@ -49,10 +49,11 @@ def detect():
         #img = base64.b64decode(j["img"])
         #bgreq = j["bg"]
 
-        temp = request.json["img"]
+        #temp = request.json["img"]
+        rjson = request.get_json()
 
-        img = np.frombuffer(base64.b64decode(temp), dtype=np.uint8)
-        bgreq = request.json["bg"]
+        img = np.frombuffer(base64.b64decode(rjson["img"]), dtype=np.uint8)
+        bgreq = rjson["bg"]
 
         #print(img)
 
@@ -60,7 +61,7 @@ def detect():
 
         if bg is None :
             bg = cv2.cvtColor(reqframe, cv2.COLOR_BGR2GRAY)
-            res={"res":-1,"img":temp}
+            res={"res":-1,"img":rjson["img"]}
             response = jsonify(res)
 
         else :
