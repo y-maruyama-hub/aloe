@@ -8,6 +8,8 @@ import json
 #import urllib.parse
 import urllib.request
 import base64
+import time
+import datetime
 from datetime import timedelta
 import traceback
 
@@ -147,6 +149,8 @@ def framediff(frame):
     if bg is None :
         return None
 
+    writeImg("1",frame)
+
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
     frame_diff = cv2.absdiff(bg,gray)
@@ -182,9 +186,12 @@ def framediff(frame):
                 color=(0, 255, 0)
 
                 if predict(expimg)>0.7 :
+                    writeImg("1",expimg)
                     det1 += 1
                     color=(255, 0, 0)
+                    
                 else :
+                    writeImg("0",expimg)
                     det2 += 1
 
                 cv2.circle(retframe, (cx,cy), 4, color, 2)
@@ -196,6 +203,12 @@ def framediff(frame):
     elif det2>0 : detec = 0
 
     return detec,retframe
+
+
+def writeImg(dir,frame):
+    tm = datetime.datetime.fromtimestamp(time.time())
+    cv2.imwrite("save/{0}/{1}.jpg".format(dir,tm.strftime("%Y%m%d%H%M%S")),frame)
+
 
 
 def predict(frame):
