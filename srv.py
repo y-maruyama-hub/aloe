@@ -151,7 +151,7 @@ def framediff(frame):
     if bg is None :
         return None
 
-    writeImg("1",frame)
+    ###writeImg("1",frame)
 
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
