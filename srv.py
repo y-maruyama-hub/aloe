@@ -19,9 +19,9 @@ import mitsuba.imcut as imcut
 predicturl = None
 savepath = None
 bg = None
-diff_thr = 2000
-cutsize = 200
-allsize = 640
+diff_thr = None
+cutsize = None
+allsize = None
 
 app = Flask(__name__)
 app.config["JSON_AS_ASCII"] = False
