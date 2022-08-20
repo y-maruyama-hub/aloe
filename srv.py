@@ -17,10 +17,11 @@ import mitsuba.imcut as imcut
 
 
 predicturl = None
+savepath = None
 bg = None
-diff_thr=2000
-cutsize=(200,150)
-allsize=(640,480)
+diff_thr = None
+cutsize = None
+allsize = None
 
 app = Flask(__name__)
 app.config["JSON_AS_ASCII"] = False
@@ -208,7 +209,7 @@ def framediff(frame):
 
 def writeImg(dir,frame):
     tm = datetime.datetime.fromtimestamp(time.time())
-    cv2.imwrite("save/{0}/{1}.jpg".format(dir,tm.strftime("%Y%m%d%H%M%S")),frame)
+    cv2.imwrite("{0}/{1}/{2}.jpg".format(savepath,dir,tm.strftime("%Y%m%d%H%M%S")),frame)
 
 
 
@@ -248,5 +249,15 @@ if __name__ == '__main__':
     load_dotenv()
 
     predicturl=os.getenv("PREDICTURL")
+    savepath=os.getenv("SAVEPATH")
+
+    diff_thr = int(os.getenv("DIFFTHR"))
+
+    cutx = int(os.getenv("CUTX"))
+    allx = int(os.getenv("ALLX"))
+    ratioy = 0.75
+
+    cutsize=(cutx,cutx*ratioy)
+    allsize=(allx,allx*ratioy)
 
     app.run(host='0.0.0.0', debug=False,threaded=True,port=myport)
