@@ -170,6 +170,8 @@ def framediff(frame):
     if diff_thr < diff_point:
         contrs,hierarchy = cv2.findContours(frame_diff,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
 
+        idx = 1
+
         for pt in contrs:
             mu = cv2.moments(pt)
 
@@ -186,18 +188,23 @@ def framediff(frame):
                 #expimg = cv2.resize(expimg,cutsize)
 
                 color=(0, 255, 0)
+                preddir="0"
 
                 if predict(expimg)>0.7 :
-                    writeImg("1",expimg)
+                #    writeImg("1",expimg,idx)
+                    preddir="1"
                     det1 += 1
                     color=(255, 0, 0)
-                    
+                
                 else :
-                    writeImg("0",expimg)
+                #    writeImg("0",expimg,idx)
                     det2 += 1
+                writeImg(preddir,expimg,idx)
 
                 cv2.circle(retframe, (cx,cy), 4, color, 2)
                 cv2.rectangle(retframe,(xx[0],yy[0]),(xx[1],yy[1]),color, 1)
+
+                idx += 1
 
     detec = -1
 
@@ -207,9 +214,9 @@ def framediff(frame):
     return detec,retframe
 
 
-def writeImg(dir,frame):
+def writeImg(dir,frame,idx):
     tm = datetime.datetime.fromtimestamp(time.time())
-    cv2.imwrite("{0}/{1}/{2}.jpg".format(savepath,dir,tm.strftime("%Y%m%d%H%M%S")),frame)
+    cv2.imwrite("{0}/{1}/{2}_{3}.jpg".format(savepath,dir,tm.strftime("%Y%m%d%H%M%S"),idx),frame)
 
 
 
