@@ -264,7 +264,7 @@ if __name__ == '__main__':
     allx = int(os.getenv("ALLX"))
     ratioy = 0.75
 
-    cutsize=(cutx,cutx*ratioy)
-    allsize=(allx,allx*ratioy)
+    cutsize=(cutx,int(cutx*ratioy))
+    allsize=(allx,int(allx*ratioy))
 
     app.run(host='0.0.0.0', debug=False,threaded=True,port=myport)
