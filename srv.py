@@ -23,6 +23,11 @@ diff_thr = None
 cutsize = None
 allsize = None
 
+load_dotenv()
+
+url_base_path = os.getenv("URL_BASE_PATH")
+
+
 app = Flask(__name__)
 app.config["JSON_AS_ASCII"] = False
 app.secret_key = "hogefuga"
@@ -35,7 +40,7 @@ def init_session() :
     session.modified = True
 
 
-@app.route("/detect",methods=["POST"])
+@app.route("{0}/detect".format(url_base_path),methods=["POST"])
 def detect():
     global bg
 
@@ -125,7 +130,7 @@ def detect():
 '''
 
 
-@app.route("/bgrenew",methods=["POST"])
+@app.route("{0}/bgrenew".format(url_base_path),methods=["POST"])
 def bgrenew():
     global bg
 
@@ -252,8 +257,6 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     myport=int(args.port)
-
-    load_dotenv()
 
     predicturl=os.getenv("PREDICTURL")
     savepath=os.getenv("SAVEPATH")
